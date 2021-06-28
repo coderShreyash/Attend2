@@ -1,0 +1,225 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview</title>
+      <!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyCCJX1wflEqUM2QEb5rT45ZSJdeG7Z7TWs",
+    authDomain: "attendance-2b61f.firebaseapp.com",
+    projectId: "attendance-2b61f",
+    storageBucket: "attendance-2b61f.appspot.com",
+    messagingSenderId: "881908872853",
+    appId: "1:881908872853:web:7b001064a12cf26e660d9c"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+</script>
+</head>
+<body>
+    <div id="popup" style="display: none;border: 3px solid black;padding:10px;">
+        <center><h1 style="margin-top: -10px;">Register As Teacher</h1>
+          <hr style="margin-top: -15px;">
+        <form onsubmit="createTeacher()">
+        <h2>Enter Name: </h2>
+        <input type="text" id="name" required placeholder="Your Name" style="font-size:15;border: 2.5px solid black;" maxlength="15"><br><br>
+        <button type="submit" style="background-color:#8600b3;color:white;padding:5;font-size:20;border:2.5px solid black">Submit</button>
+        </form>
+      </center>
+      </div>
+      <div id="main"> <center>
+        <h1 >Attendance For: </h1>
+  
+    <h1 id="title"></h1>
+    <label id="date"></label>
+    </center>
+
+    <div id="name" style="display: block;">
+  <h2>Enter Your Name: </h2>
+  <input type="text" id="name">
+</div>
+
+<div id="sub" style="display: none;">
+  <h2>Which Subject is Going On ? </h2>
+<select id="subject">
+    <option>Mathematics</option>
+    <option>Science</option>
+    <option>Physics</option>
+    <option>Chemistry</option>
+    <option>Biology</option>
+    <option>Social Studies</option>
+    <option>History</option>
+    <option>Geography</option>
+    <option>Computer</option>
+    <option>Economics</option>
+</select>
+</div>
+
+<div id="class" style="display: none;">
+    <h2>Enter Your Class: </h2>
+    <input type="number" maxlength=2>
+  </div>
+
+<div id="sec" style="display: none;">
+  <h2>Enter Your Section: </h2>
+  <input type="text" autocapitalize >
+</div>
+
+<div id="roll" style="display: none;">
+  <h2>Enter Your Roll No: </h2>
+  <input type="number">
+</div>
+
+<div id="pic" style="display: none;">
+ 
+<h2>Take Your Picture: </h2>
+
+
+
+    <!-- -->
+    <div id="my_camera"></div>
+    <input type=button value="Take Picture" onClick="take_snapshot()">
+     
+    <div id="results" ></div>
+</div>
+<br>
+
+<button style="background-color:rgb(0, 162, 255);font-size: 25px;color: white;" type="button" onclick="submi()"><b>Submit</b></button>
+
+</div>
+<script type="text/javascript" src="webcam.min.js"></script>
+    
+    <!-- Code to handle taking the snapshot and displaying it locally -->
+    <script>
+        
+        var database = firebase.database();
+        var title=location.search.split("&")[0].slice(7);
+        var clas="";
+        var roll="";
+        var pic="";
+        var sec="";
+        var sub="";
+        var id = location.search.split("&")[1].slice(3)+location.search.split("&")[0].slice(7)
+        var image=""
+        var date=""
+        var time;
+
+    
+     // Configure a few settings and attach camera
+     Webcam.set({
+      width: 320,
+      height: 240,
+      image_format: 'jpeg',
+      jpeg_quality: 90
+     });
+     Webcam.attach( '#my_camera' );
+    
+     // preload shutter audio clip
+     var shutter = new Audio();
+     shutter.autoplay = true;
+     shutter.src = navigator.userAgent.match(/Firefox/) ? 'shutter.ogg' : 'shutter.mp3';
+    
+    function take_snapshot() {
+     // play sound effect
+     shutter.play();
+    
+     // take snapshot and get image data
+     Webcam.snap( function(data_uri) {
+     // display results in page
+     document.getElementById('results').innerHTML = 
+      '<img src="'+data_uri+'"/>';
+      image=data_uri;
+     } );
+    }
+
+
+        setInterval(function(){
+      
+          database.ref(id+"/Date").on('value',function(data){
+             date=data.val()
+            })
+            database.ref(id+"/Time").on('value',function(data){
+             time=data.val()
+            })
+            database.ref(id+"/Class").on('value',function(data){
+             clas=data.val()
+            })
+            database.ref(id+"/Roll").on('value',function(data){
+             roll=data.val()
+            })
+            database.ref(id+"/Picture").on('value',function(data){
+             pic=data.val()
+            })
+            database.ref(id+"/Section").on('value',function(data){
+             sec=data.val()
+            })
+            database.ref(id+"/Subject").on('value',function(data){
+             sub=data.val()
+            })
+
+
+            document.getElementById("title").innerHTML=title
+            a=new Date();
+            a=a.getTime();
+            var ms = (parseInt(time)-parseInt(a));
+var d = new Date(1000*Math.round(ms/1000));
+function pad(i) { return ('0'+i).slice(-2); }
+var str = pad(d.getUTCMinutes()) + ':' + pad(d.getUTCSeconds());
+if(parseInt(str)<0){
+  document.getElementById("date").innerHTML="Time Left For Submitting Form is Finished"
+}
+else{
+  document.getElementById("date").innerHTML="Time Left For Submitting Form: "+str;
+}
+
+            if(clas==="on"){
+                document.getElementById("class").style.display="block"
+            }
+            if(roll==="on"){
+                document.getElementById("roll").style.display="block"
+            }
+            if(pic==="on"){
+                document.getElementById("pic").style.display="block"
+            }
+            if(sub==="on"){
+                document.getElementById("sub").style.display="block"
+            }
+            if(sec==="on"){
+                document.getElementById("sec").style.display="block"
+            }
+        
+    },500)
+
+    function submi(){
+        if(nam==="on"){
+                document.getElementById("name").style.display="block"
+            }
+            if(clas==="on"){
+                document.getElementById("class").style.display="block"
+            }
+            if(roll==="on"){
+                document.getElementById("roll").style.display="block"
+            }
+            if(pic==="on"){
+                document.getElementById("pic").style.display="block"
+            }
+            if(sub==="on"){
+                document.getElementById("sub").style.display="block"
+            }
+            if(sec==="on"){
+                document.getElementById("sec").style.display="block"
+            }
+    }
+        </script>
+</body>
+</html>
